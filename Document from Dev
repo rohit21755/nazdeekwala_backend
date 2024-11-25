@@ -1,0 +1,1997 @@
+openapi: 3.0.0
+info:
+  title: Nazdikwala Api Docs
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development Server
+  - url: https://dev.api.example.com/v1
+    description: Production Server
+
+tags:
+  - name: Admin
+    description: Admin related endpoints
+  - name: Super Admin
+    description: Super Admin related endpoints
+  - name: User
+    description: User related endpoints
+  - name: Brand
+    description: Brand related endpoints
+  - name: Category
+    description: Category related endpoints
+  - name: CMS
+    description: CMS (Content Management System) related endpoints
+  - name: Coupons
+    description: Coupons related endpoints
+  - name: Product
+    description: Product related endpoints
+
+components:
+  securitySchemes:
+    cookieToken:
+      type: apiKey
+      in: header
+      name: nazdikwala
+
+security:
+  - cookieToken: []
+
+paths:
+  # Admin Login
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      summary: Admin Login
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+                  example: "1234567890"
+                password:
+                  type: string
+                  example: "password123"
+                loginType:
+                  type: string
+                  description: Type of login (e.g., "superAdmin or admin")
+                  example: "superAdmin"
+      responses:
+        "200":
+          description: Successful login
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get Admin Profile
+  /admin/profile:
+    get:
+      tags:
+        - Admin
+      summary: Get Admin Profile
+      security:
+        - cookieToken: []
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Update Admin Profile
+    put:
+      tags:
+        - Admin
+      summary: Update Admin Profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Vikash Sharma"
+                businessName:
+                  type: string
+                  example: "VikashSharma"
+                gstNumber:
+                  type: string
+                  example: "8208026595"
+                businessType:
+                  type: string
+                  example: "Electronics"
+                email:
+                  type: string
+                  example: "vikashsharma@gmail.com"
+                mobileNumber:
+                  type: string
+                  example: "8209083798"
+                avatar:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This avatar Will Be Removed From DB
+                shopLogo:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This shopLogo Will Be Removed From DB
+                address:
+                  type: object
+                  properties:
+                    state:
+                      type: string
+                      example: "Rajasthan"
+                    city:
+                      type: string
+                      example: "Pilani"
+                    pinCode:
+                      type: string
+                      example: "333031"
+                    addressLine1:
+                      type: string
+                      example: "Address 1"
+                    addressLine2:
+                      type: string
+                      example: "Address 2"
+      responses:
+        "200":
+          description: Successful Operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  #Change Password Admin
+  /admin/change-password:
+    post:
+      tags:
+        - Admin
+      summary: Change Password
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # -----------------------------------Super Admin---------------------------------
+
+  # Create User Super Admin
+  /super/admin/create/user:
+    post:
+      tags:
+        - Super Admin
+      summary: Create User By Super Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  example: "Johndoe@gmail.com"
+                mobileNumber:
+                  type: string
+                  example: "1111111111"
+                password:
+                  type: string
+                  example: "John@Doe@1551"
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Get All Users By Super Admin
+  /super/admin/all-users:
+    get:
+      tags:
+        - Super Admin
+      summary: Get All Users
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get Single User By Id (Super Admin)
+  /super/admin/user/{id}:
+    get:
+      tags:
+        - Super Admin
+      summary: Get Single User
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user to get
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict Error
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # Update user By Ud (Super Admin)
+    put:
+      tags:
+        - Super Admin
+      summary: Update User By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user to get
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  example: "Johndoe@gmail.com"
+                mobileNumber:
+                  type: string
+                avatar:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This avatar Will Be Removed From DB
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete User Super Admin
+    delete:
+      tags:
+        - Super Admin
+      summary: Delete User By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user to get
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "422":
+          description: Not allowed
+        "500":
+          description: Internal Server Error
+
+  # Create Admin By Super Admin
+  /super/admin/create/admin:
+    post:
+      tags:
+        - Super Admin
+      summary: Create Admin By Super Admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Vikash Sharma"
+                businessName:
+                  type: string
+                  example: "VikashSharma"
+                gstNumber:
+                  type: string
+                  example: "8208026595"
+                businessType:
+                  type: string
+                  example: "Electronics"
+                email:
+                  type: string
+                  example: "vikashsharma@gmail.com"
+                mobileNumber:
+                  type: string
+                  example: "8209083798"
+                avatar:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This avatar Will Be Removed From DB
+                shopLogo:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This shopLogo Will Be Removed From DB
+                address:
+                  type: object
+                  properties:
+                    state:
+                      type: string
+                      example: "Rajasthan"
+                    city:
+                      type: string
+                      example: "Pilani"
+                    pinCode:
+                      type: string
+                      example: "333031"
+                    addressLine1:
+                      type: string
+                      example: "Address 1"
+                    addressLine2:
+                      type: string
+                      example: "Address 2"
+      responses:
+        "200":
+          description: Successful Operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get All Admins By Super Admin
+  /super/admin/all-admins:
+    get:
+      tags:
+        - Super Admin
+      summary: Get All Admins
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # Update Admin Profile
+  /super/admin/profile:
+    put:
+      tags:
+        - Super Admin
+      summary: Update Super Admin Profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Vikash Sharma"
+                email:
+                  type: string
+                  example: "vikashsharma@gmail.com"
+                mobileNumber:
+                  type: string
+                  example: "8209083798"
+                avatar:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This avatar Will Be Removed From DB
+      responses:
+        "200":
+          description: Successful Operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get Single Admin By Id (Super Admin)
+  /super/admin/{id}:
+    get:
+      tags:
+        - Super Admin
+      summary: Get Single Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the admin to get
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict Error
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # Update Admin By Id (Super Admin)
+    put:
+      tags:
+        - Super Admin
+      summary: Update Admin By (ID) Super Admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Vikash Sharma"
+                businessName:
+                  type: string
+                  example: "VikashSharma"
+                gstNumber:
+                  type: string
+                  example: "8208026595"
+                businessType:
+                  type: string
+                  example: "Electronics"
+                email:
+                  type: string
+                  example: "vikashsharma@gmail.com"
+                mobileNumber:
+                  type: string
+                  example: "8209083798"
+                avatar:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This avatar Will Be Removed From DB
+                shopLogo:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This shopLogo Will Be Removed From DB
+                address:
+                  type: object
+                  properties:
+                    state:
+                      type: string
+                      example: "Rajasthan"
+                    city:
+                      type: string
+                      example: "Pilani"
+                    pinCode:
+                      type: string
+                      example: "333031"
+                    addressLine1:
+                      type: string
+                      example: "Address 1"
+                    addressLine2:
+                      type: string
+                      example: "Address 2"
+      responses:
+        "200":
+          description: Successful Operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete User Super Admin
+    delete:
+      tags:
+        - Super Admin
+      summary: Delete Admin By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # ------------------------------------ Brands------------------------------------
+
+  # Create Brand Super Admin
+  /super/admin/create/brand:
+    post:
+      tags:
+        - Brand
+      summary: Create Brand By Super Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                brandName:
+                  type: string
+                  example: "Apple"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Create Brand Admin
+  /admin/create/brand:
+    post:
+      tags:
+        - Brand
+      summary: Create Brand By Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                brandName:
+                  type: string
+                  example: "Apple"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get All Brands
+  /brands:
+    get:
+      tags:
+        - Brand
+      summary: Get All Brands
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get Single Brand By Id
+  /brand/{id}:
+    get:
+      tags:
+        - Brand
+      summary: Get Single Brand
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the brand to get
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Update Brand Super Admin
+  /super/admin/brand/{id}:
+    put:
+      tags:
+        - Brand
+      summary: Update Brand By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the brand to get
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                brandName:
+                  type: string
+                  example: "Apple"
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Brand Super Admin
+    delete:
+      tags:
+        - Brand
+      summary: Delete Brand By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the brand to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Update Brand Admin
+  /admin/brand/{id}:
+    put:
+      tags:
+        - Brand
+      summary: Update Brand By (ID) Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the brand to get
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                brandName:
+                  type: string
+                  example: "Apple"
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Brand Admin
+    delete:
+      tags:
+        - Brand
+      summary: Delete Brand By (ID) Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the brand to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # -----------------------------------Category-------------------------------
+
+  # Create Category Super Admin
+  /super/admin/create/category:
+    post:
+      tags:
+        - Category
+      summary: Create Category By Super Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: "Smartphones"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get All Categories
+  /categories:
+    get:
+      tags:
+        - Category
+      summary: Get All Categories
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get Single Category By Id
+  /category/{id}:
+    get:
+      tags:
+        - Category
+      summary: Get Single Category
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to get
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Update Category Super Admin
+  /super/admin/category/{id}:
+    put:
+      tags:
+        - Category
+      summary: Update Category By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to get
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                  example: "Smartphones"
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Category Super Admin
+    delete:
+      tags:
+        - Category
+      summary: Delete Category By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # -----------------------------------CMS (Content Manage System)-------------------------------
+
+  # Create Page Super Admin
+  /super/admin/create/page:
+    post:
+      tags:
+        - CMS
+      summary: Create Page By Super Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                pageTitle:
+                  type: string
+                  example: About Us
+                pageContent:
+                  type: string
+                  example: About Us Nazdikwala
+                isPublic:
+                  type: boolean
+                  example: true
+                featuredImage:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get All Pages
+  /pages:
+    get:
+      tags:
+        - CMS
+      summary: Get All Pages
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get Single Category By Id
+  /page/{id}:
+    get:
+      tags:
+        - CMS
+      summary: Get Single Page
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the page to get
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  #Update Page Super Admin
+  /super/admin/page/{id}:
+    put:
+      tags:
+        - CMS
+      summary: Update Page By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the page to get
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                pageTitle:
+                  type: string
+                  example: About Us
+                pageContent:
+                  type: string
+                  example: About Us Nazdikwala
+                isPublic:
+                  type: boolean
+                  example: true
+                featuredImage:
+                  type: string
+                  format: binary
+                  description: If You Pass Empty Value Then This shopLogo Maybe Be Removed From DB
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Page Super Admin
+    delete:
+      tags:
+        - CMS
+      summary: Delete Page By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the page to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # -----------------------------------Coupons-------------------------------
+
+  # Create Coupon Super Admin
+  /super/admin/create/coupon:
+    post:
+      tags:
+        - Coupons
+      summary: Create Coupon By Super Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                couponName:
+                  type: string
+                  example: Weekend
+                couponCode:
+                  type: string
+                  example: JOY15
+                discountPercent:
+                  type: number
+                  example: 15
+                status:
+                  type: string
+                  example: active
+                  enum: [active, inactive]
+                  description: It Can Be "active" Or "inactive"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Create Coupon Admin
+  /admin/create/coupon:
+    post:
+      tags:
+        - Coupons
+      summary: Create Coupon By Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                couponName:
+                  type: string
+                  example: Weekend
+                couponCode:
+                  type: string
+                  example: JOY15
+                discountPercent:
+                  type: number
+                  example: 15
+                status:
+                  type: string
+                  example: active
+                  enum: [active, inactive]
+                  description: It Can Be "active" Or "inactive"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get All Coupons Super Admin
+  /coupons:
+    get:
+      tags:
+        - Coupons
+      summary: Get All Coupons
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get Single Coupon By Id Super Admin
+  /coupon/{id}:
+    get:
+      tags:
+        - Coupons
+      summary: Get Single Coupon
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the coupon to get
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  # Get All Coupons Admin
+  /admin/coupons:
+    get:
+      tags:
+        - Coupons
+      summary: Get All Coupons Admin
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  #Update Coupon Super Admin
+  /super/admin/coupon/{id}:
+    put:
+      tags:
+        - Coupons
+      summary: Update Coupon By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the coupon to get
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                couponName:
+                  type: string
+                  example: Weekend
+                couponCode:
+                  type: string
+                  example: JOY15
+                discountPercent:
+                  type: number
+                  example: 15
+                status:
+                  type: string
+                  example: active
+                  enum: [active, inactive]
+                  description: It Can Be "active" Or "inactive"
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Coupon Super Admin
+    delete:
+      tags:
+        - Coupons
+      summary: Delete Coupon By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the coupon to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  #Update Coupon Admin
+  /admin/coupon/{id}:
+    put:
+      tags:
+        - Coupons
+      summary: Update Coupon By (ID) Super Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the coupon to get
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                couponName:
+                  type: string
+                  example: Weekend
+                couponCode:
+                  type: string
+                  example: JOY15
+                discountPercent:
+                  type: number
+                  example: 15
+                status:
+                  type: string
+                  example: active
+                  enum: [active, inactive]
+                  description: It Can Be "active" Or "inactive"
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+    # Delete Coupon Admin
+    delete:
+      tags:
+        - Coupons
+      summary: Delete Coupon By (ID) Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the coupon to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # -----------------------------------User-------------------------------
+
+  # Register User
+  /register:
+    post:
+      tags:
+        - User
+      summary: Register User
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                mobileNumber:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: number
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Verify Otp
+  /otp:
+    post:
+      tags:
+        - User
+      summary: OTP Verification
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+                otp:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Resend Otp
+  /resend-otp:
+    post:
+      tags:
+        - User
+      summary: Resend Otp
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  #Login User
+  /login:
+    post:
+      tags:
+        - User
+      summary: Login
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Get User Profile
+  /user-profile:
+    get:
+      tags:
+        - User
+      summary: Get User Profile
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  #Forgot Password User
+  /forgotPassword:
+    post:
+      tags:
+        - User
+      summary: Forgot Password
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  #Reset Password User
+  /resetPassword:
+    post:
+      tags:
+        - User
+      summary: Reset Password
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                mobileNumber:
+                  type: string
+                otp:
+                  type: string
+                  description: Get OTP From forgotPassword Endpoint
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  #Change Password User
+  /user/change-password:
+    post:
+      tags:
+        - User
+      summary: Change Password (User And SuperAdmin)
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  #Logout User
+  /logout:
+    post:
+      tags:
+        - User
+      summary: Logout
+      security:
+        - cookieToken: []
+      responses:
+        "200":
+          description: Successful operation
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # ------------------------------------ Products------------------------------------
+
+  # Upload Variant Images
+  /upload-variant-images:
+    post:
+      tags:
+        - Product
+      summary: Upload Variant Images
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Create Product Admin
+  /product/create:
+    post:
+      tags:
+        - Product
+      summary: Create Product Admin
+      security:
+        - cookieToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nameOfProduct:
+                  type: string
+                  example: Samsung S23 Ultra 5G
+                category:
+                  type: string
+                  example: 64c24cbba7e819d4f7ed21eb
+                  description: It Should Be Id
+                brand:
+                  type: string
+                  example: 64c254eed4f98a5391b240f9
+                  description: It Should Be Id
+                variants:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: Samsung Galaxy S23 Ultra 5G (Green, 256 GB)  (12 GB RAM)
+                      images:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - https://i.ibb.co/GprVZdr/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwctcvavyn.webp
+                          - https://i.ibb.co/9GBpQzL/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwybz4xcmu.webp
+                          - https://i.ibb.co/vBCS6V5/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwgrpf9hcz.webp
+                      price:
+                        type: integer
+                        example: 124999
+                      discountPercentage:
+                        type: integer
+                        example: 16
+                      discountPrice:
+                        type: integer
+                        example: 104999
+                      stock:
+                        type: integer
+                        example: 34
+                      description:
+                        type: string
+                        example: Get a smartphone for yourself that can detect your moods and react appropriately. The Samsung Galaxy Ultra's potent processor and advanced camera sensor can handle low light and noise reduction. The phone's Snapdragon 8 Gen 2 processor, which also provides a long battery life to carry you through even the busiest days, also enables quick gaming and video streaming. You can also launch Expert RAW to take high-resolution RAW photos that are vivid and packed with information. Moreover, Dynamic AMOLED 2X offers clear, brilliant details in both bright and low-light conditions. Additionally, to smooth up gaming and save power, the refresh rate is automatically optimised with 120 Hz technology.
+                      attributes:
+                        type: object
+                        properties:
+                          Ram:
+                            type: string
+                            example: 12 GB
+                          Storage:
+                            type: string
+                            example: 256 GB
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - Samsung s23 Ultra
+                          - 5G Smartphones
+                          - Samsung Smartphones
+
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Get All Products
+  /products:
+    get:
+      tags:
+        - Product
+      summary: Get All Products
+      responses:
+        "200":
+          description: Successful operation
+        "500":
+          description: Internal Server Error
+
+  # Get All Products (Admin Only)
+  /products/myProduct:
+    get:
+      tags:
+        - Product
+      summary: Get All Products (Only Admin Which Is Logged In)
+      responses:
+        "200":
+          description: Successful operation
+        "500":
+          description: Internal Server Error
+
+  # Get Single Product
+  /product/{id}:
+    get:
+      tags:
+        - Product
+      summary: Get Single Product
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the product to get
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+    # Update Product Admin
+    put:
+      tags:
+        - Product
+      summary: Update Product Admin
+      security:
+        - cookieToken: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the product to get
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nameOfProduct:
+                  type: string
+                  example: Samsung S23 Ultra 5G
+                category:
+                  type: string
+                  example: 64c24cbba7e819d4f7ed21eb
+                  description: It Should Be Id
+                brand:
+                  type: string
+                  example: 64c254eed4f98a5391b240f9
+                  description: It Should Be Id
+          responses:
+            "200":
+              description: Successful operation
+            "401":
+              description: Unauthorized
+            "404":
+              description: Not Found
+            "422":
+              description: Unprocessable Content
+            "500":
+              description: Internal Server Error
+
+        # Delete Product Admin
+    delete:
+      tags:
+        - Product
+      summary: Delete Product By (ID) Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the product to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "404":
+          description: Not Found
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Create Product Variant Admin
+  /product/variant/create/{productId}:
+    post:
+      tags:
+        - Product
+      summary: Create Product Variant Admin
+      security:
+        - cookieToken: []
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+          required: true
+          description: id of the product to create a new variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Samsung Galaxy S23 Ultra 5G (Green, 256 GB)  (12 GB RAM)
+                images:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - https://i.ibb.co/GprVZdr/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwctcvavyn.webp
+                    - https://i.ibb.co/9GBpQzL/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwybz4xcmu.webp
+                    - https://i.ibb.co/vBCS6V5/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwgrpf9hcz.webp
+                price:
+                  type: integer
+                  example: 124999
+                discountPercentage:
+                  type: integer
+                  example: 16
+                discountPrice:
+                  type: integer
+                  example: 104999
+                stock:
+                  type: integer
+                  example: 34
+                description:
+                  type: string
+                  example: Get a smartphone for yourself that can detect your moods and react appropriately. The Samsung Galaxy Ultra's potent processor and advanced camera sensor can handle low light and noise reduction. The phone's Snapdragon 8 Gen 2 processor, which also provides a long battery life to carry you through even the busiest days, also enables quick gaming and video streaming. You can also launch Expert RAW to take high-resolution RAW photos that are vivid and packed with information. Moreover, Dynamic AMOLED 2X offers clear, brilliant details in both bright and low-light conditions. Additionally, to smooth up gaming and save power, the refresh rate is automatically optimized with 120 Hz technology.
+                attributes:
+                  type: object
+                  properties:
+                    Ram:
+                      type: string
+                      example: 12 GB
+                    Storage:
+                      type: string
+                      example: 256 GB
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - Samsung s23 Ultra
+                    - 5G Smartphones
+                    - Samsung Smartphones
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+  # Update Product Variant Admin
+  /product/variant/{id}:
+    put:
+      tags:
+        - Product
+      summary: Update Product Variant By (ID) Admin
+      security:
+        - cookieToken: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: id of the variant to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Samsung Galaxy S23 Ultra 5G (Green, 256 GB)  (12 GB RAM)
+                images:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - https://i.ibb.co/GprVZdr/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwctcvavyn.webp
+                    - https://i.ibb.co/9GBpQzL/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwybz4xcmu.webp
+                    - https://i.ibb.co/vBCS6V5/galaxy-s23-ultra-5g-smarphone-sm-s918bzgcins-samsung-original-imagqjhwgrpf9hcz.webp
+                price:
+                  type: integer
+                  example: 124999
+                discountPercentage:
+                  type: integer
+                  example: 16
+                discountPrice:
+                  type: integer
+                  example: 104999
+                stock:
+                  type: integer
+                  example: 34
+                description:
+                  type: string
+                  example: Get a smartphone for yourself that can detect your moods and react appropriately. The Samsung Galaxy Ultra's potent processor and advanced camera sensor can handle low light and noise reduction. The phone's Snapdragon 8 Gen 2 processor, which also provides a long battery life to carry you through even the busiest days, also enables quick gaming and video streaming. You can also launch Expert RAW to take high-resolution RAW photos that are vivid and packed with information. Moreover, Dynamic AMOLED 2X offers clear, brilliant details in both bright and low-light conditions. Additionally, to smooth up gaming and save power, the refresh rate is automatically optimized with 120 Hz technology.
+                attributes:
+                  type: object
+                  properties:
+                    Ram:
+                      type: string
+                      example: 12 GB
+                    Storage:
+                      type: string
+                      example: 256 GB
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - Samsung s23 Ultra
+                    - 5G Smartphones
+                    - Samsung Smartphones
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict Error
+        "500":
+          description: Internal Server Error
+
+    #Delete Product Variant Admin
+    delete:
+      tags:
+        - Product
+      summary: Delete Product Variant By (ID) Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the variant to get
+      responses:
+        "200":
+          description: Successful operation
+        "422":
+          description: Not allowed
+        "404":
+          description: Not Found
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+
+  # Get Single Product
+  /products/filters:
+    post:
+      tags:
+        - Product
+      summary: Filter Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  example: "64c24cbba7e819d4f7ed21eb"
+                brand:
+                  type: string
+                  example: "64c254eed4f98a5391b240f9"
+                price:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - "10000"
+                    - "20000"
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+
+  #Search Product By Keyword
+  /product/search/{keyword}:
+    get:
+      tags:
+        - Product
+      summary: Search Product
+      parameters:
+        - in: path
+          name: keyword
+          schema:
+            type: string
+          required: true
+          description: Search Product By Keyword
+      responses:
+        "200":
+          description: Successful operation
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
