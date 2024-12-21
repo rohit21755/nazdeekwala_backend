@@ -6,28 +6,22 @@ const ErrorHandler = require("../utils/errorHandler");
 
 //Check User Is Authenticated Or Not
 const isAuthenticated = catchAsyncError(async (req, res, next) => {
-  let { nazdikwalaUser } = req.cookies;
   const { authorization } = req.headers;
   console.log("called super");
-  const nazdikwala = nazdikwalaUser
-  if (!nazdikwala && !authorization)
-    return next(new ErrorHandler("Not Logged In", 401));
- 
-  let token;
-  if (nazdikwala) {
-    token = nazdikwala;
-  } else if (authorization && authorization.startsWith("Bearer ")) {
-    token = authorization.replace("Bearer ", "");
-  }
-  if (!token) {
+
+  if (!authorization || !authorization.startsWith("Bearer ")) {
     return next(new ErrorHandler("Not Logged In", 401));
   }
+
+  const token = authorization.replace("Bearer ", "");
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   req.user = await User.findById(decoded._id);
   if (!req.user) return next(new ErrorHandler("Not Logged In", 401));
+  
   next();
 });
+
 
 //Check The Role Of The User Is Super Admin Or Not
 const isSuperAdmin = catchAsyncError(async (req, res, next) => {
