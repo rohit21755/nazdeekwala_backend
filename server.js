@@ -16,16 +16,11 @@ const server = app.listen(8000, () => {
   console.log(`Server is  running on http://localhost:${process.env.PORT}`);
 });
 
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    credentials: true,
-  },
-});
-let service = new SocketService(io);
-service.initSocket();
+// Initialize WebSocket server
+const socketService = new SocketService(server);
+socketService.initSocket();
 
-
+// Error handling
 process.on("uncaughtException", (err) => {
   console.log(`Error: ${err.message}`);
   console.log("Shutting Down the Server due to Uncaught Exception");
@@ -34,7 +29,6 @@ process.on("uncaughtException", (err) => {
   });
 });
 
-// Unhandled Promise Rejections
 process.on("unhandledRejection", (err) => {
   console.log(`Error: ${err.message}`);
   console.log("Shutting Down the Server due to Unhandled Promise Rejections");

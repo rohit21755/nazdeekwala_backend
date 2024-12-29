@@ -1,122 +1,185 @@
+const WebSocket = require('ws');
 const jwt = require("jsonwebtoken");
 const { sendMessage } = require("./controllers/chatController.js");
 const messageModel = require("./models/messagesModel");
 const chatModel = require("./models/chatModel.js");
-const myEmitter = require('./utils/event')
-
-// const socketServer = (io)=>{
-//     io.on("connection", socket =>{
-//         socket.on('set up', (chatId)=> {
-//             socket.add(chatId)
-
-//         })
-//         socket.on('send message', (data)=>{
-
-//         })
-
-//         socket.on('recived message', (data)=>{
-
-//         })
-
-//         socket.on('disconnect', ()=>{
-//             socket.leave()
-//         })
-//     })
-// }
+const myEmitter = require('./utils/event');
 
 class SocketService {
-  constructor(socketIo) {
-    this.io = socketIo;
+  constructor(server) {
+    this.wss = new WebSocket.Server({ server });
+    this.clients = new Map(); // Store client connections with their IDs
+    this.chatRooms = new Map(); // Store chat rooms and their participants
   }
 
   initSocket() {
-    this.io.on("connection", (socket) => {
-      console.log('socket connected"');
-      socket.on("set up", async (token) => {
-        console.log(token);
-        if(!token || !token.length) {
-          socket.emit("error", "Token need")
-          return ;
-        }
+    this.wss.on('connection', (ws) => {
+      console.log('WebSocket connected');
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // const decoded = await jwt.verify(token, process.env.JWT_SECRET, (err, res)=> {
-        //     console.log(err)
-
-        // });
-        console.log("decode", decoded);
-        if (decoded) {
-          socket._id = decoded._id;
-        }
-      });
-
-      myEmitter.on('new order', async(data)=>{
-        let {chatId} = data
-        this.io.to(socket.chatId).emit("received message", data);
-
-      })
-
-      socket.on("join chat", async (chatId) => {
-        //console.log("chatid")
+      ws.on('message', async (message) => {
         try {
-          if (socket._id) {
-            let chat = await chatModel.findById(chatId);
-            if (!chat) {
-              socket.emit("error", "Invalid ChatId");
-              return;
-            }
-            socket.join(chatId);
-            socket.chatId = chatId;
-            socket.emit("success");
-          }
+          const data = JSON.parse(message);
+          await this.handleMessage(ws, data);
         } catch (err) {
-          socket.emit("error", err.message);
-        }
-      });
-      socket.on("send message", async (data) => {
-        try {
-        let { message } = data;
-        console.log("new msg");
-        if (!socket._id || !socket.chatId) {
-          socket.disconnect();
-        }
-        let msg = await sendMessage({
-          _id: socket._id,
-          chatId: socket.chatId,
-          message,
-        });
-        this.io.to(socket.chatId).emit("received message", msg);
-    }catch(err){
-        socket.emit("error", err.message);
-
-        }
-      });
-      socket.on("seen message", async (msgId) => {
-        try{
-        socket.broadcast.to(socket.chatId).emit("seen message");
-        console.log(msgId);
-
-        await messageModel.findByIdAndUpdate(msgId, { seen: true });
-        await chatModel.findByIdAndUpdate(socket.chatId, { unSeenCount: 0 });
-        }catch(err){
-            socket.emit("error", err.message);
+          this.sendError(ws, err.message);
         }
       });
 
-      socket.on("leave chat", (chatId) => {
-        try{
-        socket.leave(chatId);
-        console.log("user leave chat");
-        }catch(err){
-            socket.emit("error", err.message);
-        }
-      });
-
-      socket.on("disconnect", () => {
-        console.log("socket disconnected");
-        socket.disconnect();
+      ws.on('close', () => {
+        this.handleDisconnect(ws);
       });
     });
+
+    // Handle events from myEmitter
+    myEmitter.on('new order', async (data) => {
+      const { chatId } = data;
+      this.broadcastToChatRoom(chatId, {
+        type: 'received_message',
+        data
+      });
+    });
+  }
+
+  async handleMessage(ws, data) {
+    const { type, payload } = data;
+
+    switch (type) {
+      case 'setup':
+        await this.handleSetup(ws, payload);
+        break;
+      case 'join_chat':
+        await this.handleJoinChat(ws, payload);
+        break;
+      case 'send_message':
+        await this.handleSendMessage(ws, payload);
+        break;
+      case 'seen_message':
+        await this.handleSeenMessage(ws, payload);
+        break;
+      case 'leave_chat':
+        await this.handleLeaveChat(ws, payload);
+        break;
+    }
+  }
+
+  async handleSetup(ws, { token }) {
+    if (!token) {
+      this.sendError(ws, 'Token needed');
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      ws.userId = decoded._id;
+      this.clients.set(decoded._id, ws);
+      this.sendSuccess(ws, 'Setup successful');
+    } catch (err) {
+      this.sendError(ws, 'Invalid token');
+    }
+  }
+
+  async handleJoinChat(ws, { chatId }) {
+    try {
+      if (!ws.userId) {
+        throw new Error('Not authenticated');
+      }
+
+      const chat = await chatModel.findById(chatId);
+      if (!chat) {
+        throw new Error('Invalid ChatId');
+      }
+
+      ws.chatId = chatId;
+      
+      if (!this.chatRooms.has(chatId)) {
+        this.chatRooms.set(chatId, new Set());
+      }
+      this.chatRooms.get(chatId).add(ws);
+      
+      this.sendSuccess(ws, 'Joined chat successfully');
+    } catch (err) {
+      this.sendError(ws, err.message);
+    }
+  }
+
+  async handleSendMessage(ws, { message }) {
+    try {
+      if (!ws.userId || !ws.chatId) {
+        throw new Error('Not authenticated or not in a chat');
+      }
+
+      const msg = await sendMessage({
+        _id: ws.userId,
+        chatId: ws.chatId,
+        message
+      });
+
+      this.broadcastToChatRoom(ws.chatId, {
+        type: 'received_message',
+        data: msg
+      });
+    } catch (err) {
+      this.sendError(ws, err.message);
+    }
+  }
+
+  async handleSeenMessage(ws, { msgId }) {
+    try {
+      await messageModel.findByIdAndUpdate(msgId, { seen: true });
+      await chatModel.findByIdAndUpdate(ws.chatId, { unSeenCount: 0 });
+      
+      this.broadcastToChatRoom(ws.chatId, {
+        type: 'seen_message',
+        data: { msgId }
+      }, ws); // Exclude sender
+    } catch (err) {
+      this.sendError(ws, err.message);
+    }
+  }
+
+  handleLeaveChat(ws, { chatId }) {
+    if (this.chatRooms.has(chatId)) {
+      this.chatRooms.get(chatId).delete(ws);
+      if (this.chatRooms.get(chatId).size === 0) {
+        this.chatRooms.delete(chatId);
+      }
+    }
+    delete ws.chatId;
+    this.sendSuccess(ws, 'Left chat successfully');
+  }
+
+  handleDisconnect(ws) {
+    if (ws.userId) {
+      this.clients.delete(ws.userId);
+    }
+    if (ws.chatId && this.chatRooms.has(ws.chatId)) {
+      this.chatRooms.get(ws.chatId).delete(ws);
+    }
+    console.log('WebSocket disconnected');
+  }
+
+  broadcastToChatRoom(chatId, message, excludeWs = null) {
+    if (this.chatRooms.has(chatId)) {
+      this.chatRooms.get(chatId).forEach(client => {
+        if (client !== excludeWs && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(message));
+        }
+      });
+    }
+  }
+
+  sendError(ws, message) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message
+    }));
+  }
+
+  sendSuccess(ws, message) {
+    ws.send(JSON.stringify({
+      type: 'success',
+      message
+    }));
   }
 }
 
