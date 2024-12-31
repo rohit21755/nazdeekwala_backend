@@ -63,6 +63,7 @@ class SocketService {
   }
 
   async handleSetup(ws, { token }) {
+    console.log("setup")
     if (!token) {
       this.sendError(ws, 'Token needed');
       return;
@@ -79,6 +80,7 @@ class SocketService {
   }
 
   async handleJoinChat(ws, { chatId }) {
+    console.log("join chat")
     try {
       if (!ws.userId) {
         throw new Error('Not authenticated');
