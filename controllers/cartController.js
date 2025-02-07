@@ -131,7 +131,6 @@ const cartCnt = {
     if(!exists){
       let data = await cartModel.create({userId: _id, variantId, qty, admin: variant.productId.adminId})
       return res.status(200).send({success: true, data, message: "Item Added To Cart"})
-
     }
  
     

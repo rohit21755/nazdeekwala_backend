@@ -5,6 +5,7 @@ const postSchema = mongoose.Schema({
     admin: {type: objectId, ref: 'Admin'},
     isPost: {type: Boolean, default: true},
     content: [{type: String}],
+    time: {type: Date, default: Date.now()},
     caption: {type: String, required: [true, "Caption is required"]},
     likes: [{type: objectId, ref: 'User'}],
     comments: [{user:{type: objectId, ref: 'User'}, comment: String }]

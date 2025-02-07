@@ -100,6 +100,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
 //login using mobile otp
 
 exports.loginWithMobile = catchAsyncError(async (req, res, next) => {
+  console.log(req.body);
   let { mobileNumber } = req.body;
   let user = await User.findOne({ mobileNumber });
   if (!user) {
@@ -126,6 +127,7 @@ exports.loginWithMobile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.loginWithOtp = catchAsyncError(async (req, res, next) => {
+  console.log(req.body);
   let { mobileNumber, otp } = req.body;
   if (!mobileNumber || !otp)
     return next(new ErrorHandler("All Fields Are Required", 400));

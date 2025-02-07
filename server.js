@@ -13,7 +13,7 @@ connectDatabase();
 console.log(process.env.PORT);
 
 const server = app.listen(8000, () => {
-  console.log(`Server is  running on http://localhost:${process.env.PORT}`);
+  console.log(`Server is  running on http://localhost/8000`);
 });
 
 const io = socketIo(server, {
