@@ -177,6 +177,7 @@ const demo = require("./routes/demoRoutes.js");
 const reviews = require("./routes/reviewsRoutes.js");
 const chats = require("./routes/chatRoutes.js");
 const { fakeProducts } = require("./controllers/fakeData.js");
+const post = require("./routes/postRoutes.js");
 app.use("/fake", async () => {
   console.log("fake");
   fakeProducts();
@@ -196,6 +197,7 @@ app.use("/api/v1", homePage);
 app.use("/api/v1", reviews);
 app.use("/api/v1", demo);
 app.use("/api/v1", chats);
+app.use("/api/v1", post);
 
 //fakeProducts()
 

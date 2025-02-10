@@ -1,5 +1,6 @@
 const postModel = require('../models/postModel.js')
 const variantModel = require('../models/variantModel.js')
+const userModel = require('../models/userModel.js')
 const catchAsyncError = require("../middlewares/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 
@@ -71,3 +72,30 @@ exports.unLikePost = catchAsyncError(async(req, res, next)=> {
     let liked = await postModel.findByIdAndUpdate(postId, {$pull: {likes: req.user._id}}, {new: true});
     return res.status(201).send({success: true, data: liked});
 })
+
+exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
+    let { _id } = req.user;
+    let { page = 1, limit = 10 } = req.query;
+    
+    page = parseInt(page);
+    limit = parseInt(limit);
+ 
+    let user = await userModel.findById(_id).select("following");
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+    let followings = user.following;
+    if (!followings.length) {
+        return res.status(200).json({ success: true, posts: [] });
+    }
+    let posts = await postModel
+        .find({ admin: { $in: followings } })
+        .sort({ time: -1 }) 
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate("admin", "_id fullName avatar")
+        .populate("likes", "fullName")
+        .populate("comments.user", "fullName avatar")
+        .populate("variant", "name price isPublic discountPercentage discountPrice images"); 
+    res.status(200).json({ success: true, posts });
+});
