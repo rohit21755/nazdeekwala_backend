@@ -80,14 +80,15 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
     page = parseInt(page);
     limit = parseInt(limit);
  
-    let user = await userModel.findById(_id).select("following");
+    // Fetch user and their following list
+    const user = await userModel.findById(_id).select("following");
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
     }
-    let followings = user.following;
+    const followings = user.following;
 
-    // Fetch all posts, not just the ones from followed admins
-    let posts = await postModel
+    // Fetch all posts as plain objects using .lean()
+    const posts = await postModel
         .find()
         .sort({ time: -1 }) 
         .skip((page - 1) * limit)
@@ -95,14 +96,19 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
         .populate("admin", "_id fullName avatar")
         .populate("likes", "fullName")
         .populate("comments.user", "fullName avatar")
-        .populate("variant", "name price isPublic discountPercentage discountPrice images");
+        .populate("variant", "name price isPublic discountPercentage discountPrice images")
+        .lean(); 
+    const postsWithFollowing = posts.map(post => ({
+        ...post,
+        following: followings.some(followingId => 
+            followingId.toString() === post.admin._id.toString()
+        )
+    }));
 
-    posts = posts.map(post => {
-        let isFollowing = followings.includes(post.admin._id.toString());
-        post.following = isFollowing; // Add the following field to indicate the follow status
-        return post;
-    });
-
-    res.status(200).json({ success: true, posts });
+    return res.status(200).json({ success: true, posts: postsWithFollowing });
 });
+
+
+
+
 
