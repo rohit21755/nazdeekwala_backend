@@ -85,17 +85,22 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
         return res.status(404).json({ success: false, message: "User not found" });
     }
     let followings = user.following;
-    if (!followings.length) {
-        return res.status(200).json({ success: true, posts: [] });
-    }
     let posts = await postModel
-        .find({ admin: { $in: followings } })
+        .find()
         .sort({ time: -1 }) 
         .skip((page - 1) * limit)
         .limit(limit)
         .populate("admin", "_id fullName avatar")
         .populate("likes", "fullName")
         .populate("comments.user", "fullName avatar")
-        .populate("variant", "name price isPublic discountPercentage discountPrice images"); 
+        .populate("variant", "name price isPublic discountPercentage discountPrice images");
+
+   
+    posts = posts.map(post => {
+        let isFollowing = followings.includes(post.admin._id.toString());
+        post.following = isFollowing;
+        return post;
+    });
+
     res.status(200).json({ success: true, posts });
 });
