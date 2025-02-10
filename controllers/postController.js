@@ -85,6 +85,8 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
         return res.status(404).json({ success: false, message: "User not found" });
     }
     let followings = user.following;
+
+    // Fetch all posts, not just the ones from followed admins
     let posts = await postModel
         .find()
         .sort({ time: -1 }) 
@@ -95,12 +97,12 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
         .populate("comments.user", "fullName avatar")
         .populate("variant", "name price isPublic discountPercentage discountPrice images");
 
-   
     posts = posts.map(post => {
         let isFollowing = followings.includes(post.admin._id.toString());
-        post.following = isFollowing;
+        post.following = isFollowing; // Add the following field to indicate the follow status
         return post;
     });
 
     res.status(200).json({ success: true, posts });
 });
+
