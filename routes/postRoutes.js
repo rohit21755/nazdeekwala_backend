@@ -13,7 +13,7 @@ router.route('/post')
 
 //----------  COMMENT POST -----------------//
 
-router.route("/post/comment")
+router.route("/post/comment/:postId")
 .post(isAuthenticated, addComment)
 
 
