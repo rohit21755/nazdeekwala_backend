@@ -98,8 +98,10 @@ exports.getUserFeeds = catchAsyncError(async (req, res, next) => {
         .populate("comments.user", "fullName avatar")
         .populate("variant", "name price isPublic discountPercentage discountPrice images")
         .lean(); 
+    
     const postsWithFollowing = posts.map(post => ({
         ...post,
+        comments: post.comments.map(({ _id, ...comment }) => comment), // Remove _id from comments
         following: followings.some(followingId => 
             followingId.toString() === post.admin._id.toString()
         )
