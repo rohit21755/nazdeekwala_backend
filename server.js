@@ -1,6 +1,7 @@
 const env = require("dotenv");
-const socketIo = require("socket.io");
+const { Server } = require("ws");  // Use the 'ws' WebSocket server
 const { SocketService } = require("./socket.js");
+const InstaSocket = require("./instasocket.js");
 //config
 env.config({ path: "config/config.env" });
 
@@ -12,13 +13,24 @@ const connectDatabase = require("./config/database");
 connectDatabase();
 console.log(process.env.PORT);
 
+// Main HTTP server (used for app)
 const server = app.listen(8000, () => {
-  console.log(`Server is  running on http://localhost:${process.env.PORT}`);
+  console.log(`Main server is running on http://localhost:${process.env.PORT}`);
 });
 
-// Initialize WebSocket server
+// Initialize SocketService (WebSocket server for main server)
 const socketService = new SocketService(server);
 socketService.initSocket();
+
+// Create a new HTTP server for InstaSocket (for the second WebSocket server)
+const instaServer = require("http").createServer();
+instaServer.listen(9000, () => {
+  console.log(`InstaSocket server is running on http://localhost:9000`);
+});
+
+// Initialize InstaSocket on the new server
+const instaSocket = new InstaSocket(instaServer);
+instaSocket.initSocket();
 
 // Error handling
 process.on("uncaughtException", (err) => {

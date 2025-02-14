@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
-const postModel = require('./models/post'); // Adjust path as needed
-const userModel = require('./models/user'); // Adjust path as needed
+const postModel = require('./models/postModel.js'); // Adjust path as needed
+const userModel = require('./models/userModel.js'); // Adjust path as needed
 
 class InstaSocket {
     constructor(server) {
