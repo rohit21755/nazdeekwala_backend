@@ -206,7 +206,7 @@ class UnifiedSocket {
             post.comments.push(comment);
             await post.save();
     
-            this.sendSuccess(ws, "Comment added");
+            this.sendSuccess(ws, "comment_added");
     
             // Broadcast updated comments data
             this.broadcastUpdatedPost({
