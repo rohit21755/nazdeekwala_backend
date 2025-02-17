@@ -56,7 +56,7 @@ class UnifiedSocket {
                 this.sendUserPosts(ws, payload);
                 break;
             case "likeDislikePost":
-                this.handleLikePost(ws, payload);
+                this.handleLikeDislikePost(ws, payload);
                 break;
             case "commentPost":
                 this.handleCommentPost(ws, payload);
