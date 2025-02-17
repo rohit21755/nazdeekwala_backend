@@ -161,15 +161,14 @@ class UnifiedSocket {
                 // User has not liked the post → Like it
                 post.likes.push(ws.userId);
                 await post.save();
-                this.sendSuccess(ws, "Post liked");
+                this.sendSuccess(ws, "updatedPost");
             } else {
                 // User has already liked the post → Dislike it
                 post.likes.splice(likeIndex, 1);
                 await post.save();
-                this.sendSuccess(ws, "Post disliked");
+                this.sendSuccess(ws, "updatedPost");
             }
     
-            // Send only postId and updated likes array
             this.broadcastUpdatedPost({
                 postId: post._id,
                 likes: post.likes
