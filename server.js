@@ -1,7 +1,6 @@
 const env = require("dotenv");
 const { Server } = require("ws");  // Use the 'ws' WebSocket server
-const { SocketService } = require("./socket.js");
-const InstaSocket = require("./instasocket.js");
+const { UnifiedSocket } = require("./socket");
 //config
 env.config({ path: "config/config.env" });
 
@@ -18,19 +17,11 @@ const server = app.listen(8000, () => {
   console.log(`Main server is running on http://localhost:${process.env.PORT}`);
 });
 
-// Initialize SocketService (WebSocket server for main server)
-const socketService = new SocketService(server);
-socketService.initSocket();
+// WebSocket server
+const unifiedSocket = new UnifiedSocket(server);
+unifiedSocket.initSocket();
 
-// Create a new HTTP server for InstaSocket (for the second WebSocket server)
-const instaServer = require("http").createServer();
-instaServer.listen(9000, () => {
-  console.log(`InstaSocket server is running on http://localhost:9000`);
-});
 
-// Initialize InstaSocket on the new server
-const instaSocket = new InstaSocket(instaServer);
-instaSocket.initSocket();
 
 // Error handling
 process.on("uncaughtException", (err) => {
