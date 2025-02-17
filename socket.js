@@ -116,15 +116,24 @@ class UnifiedSocket {
                 return;
             }
 
-            const posts = await postModel.find()
-                .sort({ time: -1 })
+            const posts2 = await postModel
+                .find()
+                .sort({ time: -1 }) 
                 .skip((page - 1) * limit)
                 .limit(limit)
                 .populate("admin", "_id fullName avatar")
                 .populate("likes", "fullName")
                 .populate("comments.user", "fullName avatar")
+                .populate("variant", "name price isPublic discountPercentage discountPrice images")
                 .lean();
 
+                const posts= posts2.map(post => ({
+                    ...post,
+                    comments: post.comments.map(({ _id, ...comment }) => comment), // Remove _id from comments
+                    following: followings.some(followingId => 
+                        followingId.toString() === post.admin._id.toString()
+                    )
+                }));
             this.sendMessage(ws, "postFeed", posts);
         } catch (error) {
             console.error(error);
