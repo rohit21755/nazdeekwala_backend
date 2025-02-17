@@ -115,6 +115,7 @@ class UnifiedSocket {
                 this.sendError(ws, "User not found");
                 return;
             }
+            const followings = user.following;
 
             const posts2 = await postModel
                 .find()
