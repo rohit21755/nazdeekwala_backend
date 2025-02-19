@@ -6,7 +6,7 @@ const {
   isAdminAuth,
 } = require("../middlewares/auth");
 const catchAsyncError = require("../middlewares/catchAsyncError");
-
+const {searchProducts} = require("../controllers/searchController")
 const {
   addBanner,
 
@@ -70,6 +70,8 @@ router.get("/get-demo", async (req, res) => {
   return res.send({ data });
 });
 
+
+router.route("/search").get(searchProducts);
 //-------------------------Updated apis start here----------------------------------------------//
 
 //---------------------                             ---------------------------------------//
