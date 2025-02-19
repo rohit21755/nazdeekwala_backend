@@ -71,7 +71,7 @@ router.get("/get-demo", async (req, res) => {
 });
 
 
-router.route("/search").get(searchProducts);
+router.route("/search").post(searchProducts);
 //-------------------------Updated apis start here----------------------------------------------//
 
 //---------------------                             ---------------------------------------//
