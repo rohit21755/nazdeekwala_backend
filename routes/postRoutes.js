@@ -1,5 +1,5 @@
 const express = require("express");
-const { createPost,updatePost,  deletePost, likePost, unLikePost, addComment, getUserFeeds } = require("../controllers/postController");
+const { createPost,updatePost,  deletePost, likePost, unLikePost, addComment, getUserFeeds, getPost } = require("../controllers/postController");
 const router = express.Router();
 const { isAdminAuth, isAuthenticated } = require("../middlewares/auth"); 
 const messagesModel = require("../models/messagesModel");
@@ -9,7 +9,8 @@ router.route('/post')
     .post(isAdminAuth, createPost)
     .put(isAdminAuth, updatePost)
     .delete(isAdminAuth, deletePost);
-
+router.route('/post/:adminId')
+    .get(getPost)
 
 //----------  COMMENT POST -----------------//
 
