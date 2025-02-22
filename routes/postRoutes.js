@@ -9,7 +9,7 @@ router.route('/post')
     .post(isAdminAuth, createPost)
     .put(isAdminAuth, updatePost)
     .delete(isAdminAuth, deletePost);
-router.route('/post/:adminId')
+router.route('/post/posts/:adminId')
     .get(getPost)
 
 //----------  COMMENT POST -----------------//
