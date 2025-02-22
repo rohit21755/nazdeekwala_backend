@@ -46,6 +46,12 @@ exports.deletePost = catchAsyncError(async(req, res, next)=> {
     return next(new ErrorHandler("Post deleted success", 200))
 })
 
+exports.getPost = catchAsyncError(async(req, res, next)=> {
+    let {adminId } = req.query
+    let posts = await postModel.find({admin: adminId})
+    return res.status(200).send({success: true, data: posts})
+})
+
 
 //----------------------------------------//
 
