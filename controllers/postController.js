@@ -48,7 +48,10 @@ exports.deletePost = catchAsyncError(async(req, res, next)=> {
 
 exports.getPost = catchAsyncError(async(req, res, next)=> {
     let {adminId } = req.params
-    let posts = await postModel.find({admin: adminId})
+    let posts = await postModel.find({admin: adminId}).populate("admin", "_id fullName avatar")
+        .populate("likes", "fullName")
+        .populate("comments.user", "fullName avatar")
+        .populate("variant", "name price isPublic discountPercentage discountPrice images")
     return res.status(200).send({success: true, data: posts})
 })
 
